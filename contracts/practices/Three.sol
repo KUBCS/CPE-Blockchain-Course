@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.27;
+pragma solidity 0.8.19;
 
 contract SimpleToken {
     // Token variables
@@ -40,7 +40,21 @@ contract SimpleToken {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-        // TODO //
+        address _from = msg.sender;
+
+        require(balanceOf[_from] >= _value, "Caller insufficient balance.");
+
+        uint256 _callerBalanceBefore = balanceOf[_from];
+        uint256 _receiverBalanceBefore = balanceOf[_to];
+
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+
+        uint256 _callerBalanceAfter = balanceOf[_from];
+        uint256 _receiverBalanceAfter = balanceOf[_to];
+        
+        require(_callerBalanceAfter + _value == _callerBalanceBefore);
+        require(_receiverBalanceAfter - _receiverBalanceBefore == _value);
 
         return true;
     }
@@ -50,8 +64,7 @@ contract SimpleToken {
         address _spender,
         uint256 _value
     ) public returns (bool success) {
-        // TODO //
-
+        allowance[msg.sender][_spender] = _value;
         return true;
     }
 
@@ -62,6 +75,15 @@ contract SimpleToken {
         uint256 _value
     ) public returns (bool success) {
         // TODO //
+
+        address _caller = msg.sender;
+
+        require(allowance[_from][_caller] >= _value,"Insufficient Allowance");
+        require(balanceOf[_from] >= _value,"Insufficient Balance");
+
+        allowance[_from][_caller] -= _value;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
 
         return true;
     }
